@@ -106,9 +106,8 @@ impl Repo {
                 // Convert timestamp to human-readable format
                 let datetime =
                     std::time::UNIX_EPOCH + std::time::Duration::from_secs(timestamp as u64);
-                let datetime: chrono::DateTime<chrono::Utc> = datetime.into();
-                // make this time display in the local timezone AI!
-                Ok(datetime.format("%Y-%m-%d %H:%M:%S UTC").to_string())
+                let datetime: chrono::DateTime<chrono::Local> = datetime.into();
+                Ok(datetime.format("%Y-%m-%d %H:%M:%S").to_string())
             }
             None => Ok("No commits found".to_string()),
         }
