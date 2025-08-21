@@ -32,3 +32,17 @@ pub struct Cli {
     /// Repository paths to analyze (defaults to current directory)
     pub paths: Vec<PathBuf>,
 }
+
+impl Cli {
+    pub fn setup_defaults(&mut self) {
+        // If no flags specified, enable all info flags
+        if !self.repo_urls && !self.last_update && !self.last_fetch && !self.repo_size && !self.size
+        {
+            self.repo_urls = true;
+            self.last_update = true;
+            self.last_fetch = true;
+            self.repo_size = true;
+            self.size = true;
+        }
+    }
+}
