@@ -81,6 +81,8 @@ impl Repo {
     fn get_most_recent_commit_time(&self) -> Result<String> {
         let mut most_recent_time = None;
 
+        // TODO make the below AI generated code cleaner and more idiomatic
+
         // Iterate through all references to find the most recent commit
         for reference_result in self.repo.references()?.all()? {
             let reference = match reference_result {
