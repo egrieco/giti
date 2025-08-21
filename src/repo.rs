@@ -1,3 +1,4 @@
+use chrono_humanize::{Accuracy, HumanTime, Tense};
 use color_eyre::Result;
 use gix::{discover, remote::Direction, Remote, Repository};
 use std::{borrow::Cow, fs, path::Path};
@@ -114,15 +115,8 @@ impl Repo {
                 let now = chrono::Local::now();
                 let duration = now.signed_duration_since(datetime);
 
-                let human_duration = if duration.num_days() > 0 {
-                    format!("{} days ago", duration.num_days())
-                } else if duration.num_hours() > 0 {
-                    format!("{} hours ago", duration.num_hours())
-                } else if duration.num_minutes() > 0 {
-                    format!("{} minutes ago", duration.num_minutes())
-                } else {
-                    format!("{} seconds ago", duration.num_seconds())
-                };
+                let human_duration =
+                    HumanTime::from(duration).to_text_en(Accuracy::Rough, Tense::Past);
 
                 // Color the output based on the duration
                 let colored_duration = if duration.num_days() < 7 {
