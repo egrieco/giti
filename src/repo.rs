@@ -25,7 +25,7 @@ impl Repo {
     }
 
     pub fn work_dir(&self) -> Option<&Path> {
-        self.repo.work_dir()
+        self.repo.workdir()
     }
 
     pub fn work_path(&self) -> String {
