@@ -1,4 +1,5 @@
 use color_eyre::Result;
+use gix::date::Time;
 use gix::{discover, remote::Direction, Remote, Repository};
 use std::{borrow::Cow, fs, path::Path};
 
@@ -80,9 +81,7 @@ impl Repo {
     }
 
     fn get_most_recent_commit_time(&self) -> Result<String> {
-        let mut most_recent_time = None;
-
-        // TODO make the below AI generated code cleaner and more idiomatic
+        let mut times: Vec<Time> = Vec::default();
 
         // Iterate through all references to find the most recent commit
         for reference_result in self.repo.references()?.all()? {
@@ -95,16 +94,16 @@ impl Repo {
             if let Some(oid) = target.try_id() {
                 if let Ok(commit) = self.repo.find_object(oid)?.try_into_commit() {
                     let commit_time = commit.time()?;
-
-                    if most_recent_time.is_none() || commit_time.seconds > most_recent_time.unwrap()
-                    {
-                        most_recent_time = Some(commit_time.seconds);
-                    }
+                    times.push(commit_time);
                 }
             }
         }
 
-        Ok(format_display_time(most_recent_time))
+        // times are stored as seconds since the epoch, the largest should thus be the most recent
+        match times.iter().max() {
+            Some(time) => Ok(format_display_time(time)),
+            None => Ok("NO REFERENCES FOUND".to_owned()),
+        }
     }
 
     pub fn last_fetch(&self) -> Cow<'_, str> {
