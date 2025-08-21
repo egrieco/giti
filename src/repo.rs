@@ -20,6 +20,19 @@ impl Repo {
         self.repo.work_dir()
     }
 
+    pub fn work_path(&self) -> String {
+        match self.work_dir() {
+            Some(dir) => match dir.canonicalize() {
+                // return the canonicalized path
+                Ok(path) => path.to_string_lossy().to_string(),
+                // return the original path
+                Err(_) => dir.to_string_lossy().to_string(),
+            },
+            // this must be a bare repository
+            None => "NO WORK DIR".to_owned(),
+        }
+    }
+
     pub fn remotes(&self) -> Vec<Remote> {
         let mut remotes = Vec::new();
 
@@ -107,12 +120,7 @@ impl Repo {
     }
 
     pub fn print_human_readable_info(&self, cli: &Cli) {
-        println!(
-            "Repository: {}",
-            self.work_dir()
-                .map(|r| r.to_string_lossy())
-                .unwrap_or_default()
-        );
+        println!("Repository: {}", self.work_path());
 
         if cli.repo_urls {
             println!("{}", self.repo_urls());
