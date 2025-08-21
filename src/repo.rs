@@ -1,6 +1,6 @@
 use color_eyre::Result;
 use gix::{discover, remote::Direction, Remote, Repository};
-use std::{borrow::Cow, path::Path};
+use std::{borrow::Cow, fs, path::Path};
 
 use crate::cli::Cli;
 
@@ -150,7 +150,29 @@ impl Repo {
     }
 
     pub fn last_fetch(&self) -> Cow<'_, str> {
-        todo!("Implement last fetch date retrieval using gix")
+        if let Some(work_dir) = self.work_dir() {
+            let git_dir = work_dir.join(".git");
+            
+            // Check for FETCH_HEAD first
+            let fetch_head_path = git_dir.join("FETCH_HEAD");
+            if let Ok(metadata) = fs::metadata(&fetch_head_path) {
+                if let Ok(modified) = metadata.modified() {
+                    let datetime: chrono::DateTime<chrono::Local> = modified.into();
+                    return format!("fetched: {}", datetime.format("%Y-%m-%d %H:%M:%S")).into();
+                }
+            }
+            
+            // If FETCH_HEAD not found, check for HEAD
+            let head_path = git_dir.join("HEAD");
+            if let Ok(metadata) = fs::metadata(&head_path) {
+                if let Ok(modified) = metadata.modified() {
+                    let datetime: chrono::DateTime<chrono::Local> = modified.into();
+                    return format!("cloned: {}", datetime.format("%Y-%m-%d %H:%M:%S")).into();
+                }
+            }
+        }
+        
+        "Unknown".into()
     }
 
     pub fn repo_size(&self) -> Cow<'_, str> {
