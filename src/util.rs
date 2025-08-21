@@ -1,6 +1,6 @@
-use std::time::SystemTime;
-
 use chrono_humanize::{Accuracy, HumanTime, Tense};
+use color_eyre::Result;
+use std::{fs, path::Path, time::SystemTime};
 use yansi::{Color::*, Paint, Style};
 
 pub(crate) fn format_display_time(time: SystemTime) -> String {
@@ -33,4 +33,23 @@ pub(crate) fn format_display_time(time: SystemTime) -> String {
         datetime.format("%Y-%m-%d %H:%M:%S"),
         human_duration.paint(color)
     )
+}
+
+pub(crate) fn calculate_directory_size(dir: &Path) -> Result<u64> {
+    let mut total_size = 0;
+
+    if dir.is_dir() {
+        for entry in fs::read_dir(dir)? {
+            let entry = entry?;
+            let path = entry.path();
+
+            if path.is_dir() {
+                total_size += calculate_directory_size(&path)?;
+            } else {
+                total_size += entry.metadata()?.len();
+            }
+        }
+    }
+
+    Ok(total_size)
 }

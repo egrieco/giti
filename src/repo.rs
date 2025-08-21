@@ -6,6 +6,7 @@ use yansi::Color::{self, *};
 use yansi::Paint;
 
 use crate::cli::Cli;
+use crate::util::calculate_directory_size;
 use crate::util::format_display_time;
 
 const INDENT: &str = "  ";
@@ -145,7 +146,7 @@ impl Repo {
 
     pub fn repo_size(&self) -> Cow<'_, str> {
         // For bare repositories, use the repository's git directory
-        match self.calculate_directory_size(self.repo.git_dir()) {
+        match calculate_directory_size(self.repo.git_dir()) {
             Ok(size) => format!("{INDENT}Repo Size: {}", self.format_size(size)).into(),
             Err(_) => "Unknown".into(),
         }
@@ -153,36 +154,17 @@ impl Repo {
 
     pub fn total_size(&self) -> Cow<'_, str> {
         if let Some(work_dir) = self.work_dir() {
-            match self.calculate_directory_size(work_dir) {
+            match calculate_directory_size(work_dir) {
                 Ok(size) => format!("{INDENT}Total Size: {}", self.format_size(size)).into(),
                 Err(_) => "Unknown".into(),
             }
         } else {
             // For bare repositories, use the repository's git directory
-            match self.calculate_directory_size(self.repo.git_dir()) {
+            match calculate_directory_size(self.repo.git_dir()) {
                 Ok(size) => format!("{INDENT}Total Size: {}", self.format_size(size)).into(),
                 Err(_) => "Unknown".into(),
             }
         }
-    }
-
-    fn calculate_directory_size(&self, dir: &Path) -> Result<u64> {
-        let mut total_size = 0;
-
-        if dir.is_dir() {
-            for entry in fs::read_dir(dir)? {
-                let entry = entry?;
-                let path = entry.path();
-
-                if path.is_dir() {
-                    total_size += self.calculate_directory_size(&path)?;
-                } else {
-                    total_size += entry.metadata()?.len();
-                }
-            }
-        }
-
-        Ok(total_size)
     }
 
     fn format_size(&self, size: u64) -> String {
