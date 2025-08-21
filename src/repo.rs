@@ -18,7 +18,8 @@ impl Repo {
         self.repo.work_dir()
     }
 
-    pub fn repo_urls(&self) -> Cow<'_, str> {
+    pub fn repo_urls(&self) -> Vec<String> {
+        // pull the fetch urls from the remotes via the gix repo AI!
         todo!("Implement repo URLs retrieval using gix")
     }
 
