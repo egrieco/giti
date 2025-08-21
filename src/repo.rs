@@ -138,6 +138,7 @@ impl Repo {
     }
 
     pub fn repo_size(&self) -> Cow<'_, str> {
+        // calculate the total size on disk for the files in the `git_dir` AI!
         todo!("Implement git repo size calculation using gix")
     }
 
