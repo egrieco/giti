@@ -1,7 +1,11 @@
 [package]
-name = "git-info"
+name = "giti"
 version = "0.1.0"
 edition = "2021"
+
+[[bin]]
+name = "giti"
+path = "src/main.rs"
 
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
