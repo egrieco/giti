@@ -2,6 +2,7 @@ use chrono_humanize::{Accuracy, HumanTime, Tense};
 use color_eyre::Result;
 use gix::{discover, remote::Direction, Remote, Repository};
 use std::{borrow::Cow, fs, path::Path};
+use yansi::{Color::*, Paint, Style};
 
 use crate::cli::Cli;
 
@@ -119,24 +120,24 @@ impl Repo {
                     HumanTime::from(duration).to_text_en(Accuracy::Rough, Tense::Past);
 
                 // Color the output based on the duration
-                let colored_duration = if duration.num_days() < 7 {
+                let color: Style = if duration.num_days() < 7 {
                     // Green for less than a week
-                    format!("\x1b[32m{}\x1b[0m", human_duration)
+                    Green.into()
                 } else if duration.num_days() < 30 {
                     // Blue for less than a month
-                    format!("\x1b[34m{}\x1b[0m", human_duration)
+                    Blue.into()
                 } else if duration.num_days() < 365 {
                     // Yellow for less than a year
-                    format!("\x1b[33m{}\x1b[0m", human_duration)
+                    Yellow.into()
                 } else {
                     // Red for any other interval
-                    format!("\x1b[31m{}\x1b[0m", human_duration)
+                    Red.into()
                 };
 
                 Ok(format!(
                     "{} ({})",
                     datetime.format("%Y-%m-%d %H:%M:%S"),
-                    colored_duration
+                    human_duration.paint(color)
                 ))
             }
             None => Ok("No commits found".to_string()),
