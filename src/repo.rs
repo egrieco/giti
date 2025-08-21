@@ -1,8 +1,10 @@
 use color_eyre::Result;
-use gix::{discover, Repository};
+use gix::{discover, remote::Direction, Remote, Repository};
 use std::{borrow::Cow, path::Path};
 
 use crate::cli::Cli;
+
+const INDENT: &str = "  ";
 
 pub struct Repo {
     repo: Repository,
@@ -18,20 +20,42 @@ impl Repo {
         self.repo.work_dir()
     }
 
-    pub fn repo_urls(&self) -> Vec<String> {
-        let mut urls = Vec::new();
+    pub fn remotes(&self) -> Vec<Remote> {
+        let mut remotes = Vec::new();
 
-        if let Ok(remotes) = self.repo.remote_names() {
-            for remote_name in remotes {
-                if let Ok(remote) = self.repo.find_remote(&remote_name) {
-                    if let Some(url) = remote.url(gix::remote::Direction::Fetch) {
-                        urls.push(url.to_string());
-                    }
+        for remote_name in self.repo.remote_names() {
+            if let Ok(remote) = self.repo.find_remote(&*remote_name) {
+                remotes.push(remote);
+            }
+        }
+
+        remotes
+    }
+
+    pub fn repo_urls(&self) -> Cow<'_, str> {
+        let mut urls: Vec<String> = Vec::default();
+
+        let remotes = self.remotes();
+        if remotes.is_empty() {
+            urls.push(format!("{INDENT}No Remotes"));
+        } else {
+            urls.push(format!("{INDENT}Repo URLs:"));
+            for remote in remotes {
+                if let Some(url) = remote.url(Direction::Fetch) {
+                    urls.push(format!(
+                        "{}{} {}",
+                        INDENT.repeat(2),
+                        remote
+                            .name()
+                            .map(|n| n.as_symbol().unwrap_or_default())
+                            .unwrap_or_default(),
+                        url
+                    ));
                 }
             }
         }
 
-        urls
+        urls.join("\n").into()
     }
 
     pub fn last_update(&self) -> Cow<'_, str> {
@@ -91,7 +115,7 @@ impl Repo {
         );
 
         if cli.repo_urls {
-            println!("  Repo URLs: {}", self.repo_urls());
+            println!("{}", self.repo_urls());
         }
 
         if cli.last_update {
