@@ -18,6 +18,10 @@ impl Repo {
         Ok(Self { repo })
     }
 
+    pub fn git_dir(&self) -> &Path {
+        self.repo.git_dir()
+    }
+
     pub fn work_dir(&self) -> Option<&Path> {
         self.repo.work_dir()
     }
@@ -138,16 +142,23 @@ impl Repo {
     }
 
     pub fn repo_size(&self) -> Cow<'_, str> {
+        // For bare repositories, use the repository's git directory
+        match self.calculate_directory_size(self.repo.git_dir()) {
+            Ok(size) => format!("{INDENT}Repo Size: {}", self.format_size(size)).into(),
+            Err(_) => "Unknown".into(),
+        }
+    }
+
+    pub fn total_size(&self) -> Cow<'_, str> {
         if let Some(work_dir) = self.work_dir() {
-            let git_dir = work_dir.join(".git");
-            match self.calculate_directory_size(&git_dir) {
-                Ok(size) => format!("{INDENT}Repo Size: {}", self.format_size(size)).into(),
+            match self.calculate_directory_size(&work_dir) {
+                Ok(size) => format!("{INDENT}Total Size: {}", self.format_size(size)).into(),
                 Err(_) => "Unknown".into(),
             }
         } else {
             // For bare repositories, use the repository's git directory
             match self.calculate_directory_size(self.repo.git_dir()) {
-                Ok(size) => format!("{INDENT}Repo Size: {}", self.format_size(size)).into(),
+                Ok(size) => format!("{INDENT}Total Size: {}", self.format_size(size)).into(),
                 Err(_) => "Unknown".into(),
             }
         }
@@ -187,10 +198,6 @@ impl Repo {
         } else {
             format!("{:.1} {}", size, UNITS[unit_index])
         }
-    }
-
-    pub fn total_size(&self) -> Cow<'_, str> {
-        todo!("Implement total working directory size calculation")
     }
 
     pub fn print_tsv_info(&self, cli: &Cli) {
@@ -245,7 +252,7 @@ impl Repo {
         }
 
         if cli.size {
-            println!("  Total Size: {}", self.total_size());
+            println!("{}", self.total_size());
         }
 
         println!();
