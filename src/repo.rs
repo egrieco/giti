@@ -82,18 +82,19 @@ impl Repo {
         let mut most_recent_time = None;
 
         // Iterate through all references to find the most recent commit
-        for reference in self.repo.references()?.all()? {
-            let reference = reference?;
+        for reference_result in self.repo.references()?.all()? {
+            let reference = match reference_result {
+                Ok(r) => r,
+                Err(_) => continue,
+            };
             
-            // Skip non-branch references if possible, but include all for completeness
-            if let Some(target) = reference.target() {
-                if let Some(oid) = target.try_id() {
-                    if let Ok(commit) = self.repo.find_object(oid)?.try_into_commit() {
-                        let commit_time = commit.time()?;
-                        
-                        if most_recent_time.is_none() || commit_time.seconds > most_recent_time.unwrap() {
-                            most_recent_time = Some(commit_time.seconds);
-                        }
+            let target = reference.target();
+            if let Some(oid) = target.try_id() {
+                if let Ok(commit) = self.repo.find_object(oid)?.try_into_commit() {
+                    let commit_time = commit.time()?;
+                    
+                    if most_recent_time.is_none() || commit_time.seconds > most_recent_time.unwrap() {
+                        most_recent_time = Some(commit_time.seconds);
                     }
                 }
             }
