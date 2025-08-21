@@ -2,6 +2,15 @@
 name = "giti"
 version = "0.1.0"
 edition = "2021"
+license = "BSD-3-Clause"                                                                                     # https://spdx.org/licenses/
+authors = ["Elio Grieco <grieco@egx.com>"]
+description = "A tool to easily query Git repos for basic information. Can be used via CLI or as a library."
+repository = "https://github.com/symplasma/giti"
+readme = "README.md"
+keywords = ["git", "info", "disk-size", "status"]                                                            # free text
+categories = ["command-line-utilities"]                                                                      # https://crates.io/category_slugs
+exclude = [".vscode/*", ".gitignore", ".aider.*"]
+# https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [[bin]]
 name = "giti"
