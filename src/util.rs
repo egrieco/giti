@@ -1,11 +1,11 @@
+use std::time::SystemTime;
+
 use chrono_humanize::{Accuracy, HumanTime, Tense};
-use gix::date::Time;
 use yansi::{Color::*, Paint, Style};
 
-pub(crate) fn format_display_time(time: &Time) -> String {
+pub(crate) fn format_display_time(time: SystemTime) -> String {
     // Convert timestamp to human-readable format
-    let datetime = std::time::UNIX_EPOCH + std::time::Duration::from_secs(time.seconds as u64);
-    let datetime: chrono::DateTime<chrono::Local> = datetime.into();
+    let datetime: chrono::DateTime<chrono::Local> = time.into();
 
     // Calculate human-readable time difference
     let now = chrono::Local::now();

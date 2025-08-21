@@ -101,7 +101,12 @@ impl Repo {
 
         // times are stored as seconds since the epoch, the largest should thus be the most recent
         match times.iter().max() {
-            Some(time) => Ok(format_display_time(time)),
+            Some(time) => {
+                // TODO Claude used this method, it works but there should be a cleaner way
+                let datetime =
+                    std::time::UNIX_EPOCH + std::time::Duration::from_secs(time.seconds as u64);
+                Ok(format_display_time(datetime))
+            }
             None => Ok("NO REFERENCES FOUND".to_owned()),
         }
     }
@@ -114,8 +119,8 @@ impl Repo {
             let fetch_head_path = git_dir.join("FETCH_HEAD");
             if let Ok(metadata) = fs::metadata(&fetch_head_path) {
                 if let Ok(modified) = metadata.modified() {
-                    let datetime: chrono::DateTime<chrono::Local> = modified.into();
-                    return format!("fetched: {}", datetime.format("%Y-%m-%d %H:%M:%S")).into();
+                    return format!("{INDENT}Last fetched: {}", format_display_time(modified))
+                        .into();
                 }
             }
 
@@ -123,8 +128,8 @@ impl Repo {
             let head_path = git_dir.join("HEAD");
             if let Ok(metadata) = fs::metadata(&head_path) {
                 if let Ok(modified) = metadata.modified() {
-                    let datetime: chrono::DateTime<chrono::Local> = modified.into();
-                    return format!("cloned: {}", datetime.format("%Y-%m-%d %H:%M:%S")).into();
+                    return format!("{INDENT}Last cloned: {}", format_display_time(modified))
+                        .into();
                 }
             }
         }
@@ -184,7 +189,7 @@ impl Repo {
         }
 
         if cli.last_fetch {
-            println!("  Last Fetch: {}", self.last_fetch());
+            println!("{}", self.last_fetch());
         }
 
         if cli.repo_size {
