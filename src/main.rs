@@ -40,7 +40,7 @@ fn main() {
     let paths = if cli.paths.is_empty() {
         vec![PathBuf::from(".")]
     } else {
-        cli.paths
+        cli.paths.clone()
     };
 
     // If no flags specified, enable all info flags
