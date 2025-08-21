@@ -19,8 +19,19 @@ impl Repo {
     }
 
     pub fn repo_urls(&self) -> Vec<String> {
-        // pull the fetch urls from the remotes via the gix repo AI!
-        todo!("Implement repo URLs retrieval using gix")
+        let mut urls = Vec::new();
+
+        if let Ok(remotes) = self.repo.remote_names() {
+            for remote_name in remotes {
+                if let Ok(remote) = self.repo.find_remote(&remote_name) {
+                    if let Some(url) = remote.url(gix::remote::Direction::Fetch) {
+                        urls.push(url.to_string());
+                    }
+                }
+            }
+        }
+
+        urls
     }
 
     pub fn last_update(&self) -> Cow<'_, str> {
