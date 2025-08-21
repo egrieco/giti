@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v0.1.0 (2025-08-21)
 
+<csr-id-d9b7025863f60cf413c41af177beaf1f4f612110/>
+<csr-id-0695e605df391001a0bf1999270f782105890fa1/>
+<csr-id-172da047bab18da8da09cbc170482728ac005105/>
+<csr-id-d0f1e5f3965af83d467000dc5e4fd11f7637dbf0/>
+<csr-id-0564449579ec6aaefffe113562bf54e125fd1a06/>
+<csr-id-ac21bee3afbfd9c875c647afe694061e17659550/>
+<csr-id-234f5a245421ad9d4a3408393b8db56a2739d7e5/>
+<csr-id-f85ef0231d8c7aba037dcd3e50734729a238b3e3/>
+<csr-id-910e5e53f2aff1d3c0b34eebe897d0c59bd19260/>
+<csr-id-9c7962959aa0f8465e11f9d074be2382b6394d95/>
+<csr-id-329496a4abf03cca30b4d70bba94463ed06cbe71/>
+<csr-id-a12d1076bb0e2902c403d4d21c587d2fb66f60f3/>
+
 ### Chore
 
  - <csr-id-d9b7025863f60cf413c41af177beaf1f4f612110/> Update incompatible dependencies
@@ -57,7 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 41 commits contributed to the release.
+ - 42 commits contributed to the release.
  - 34 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
 
@@ -68,6 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Add auto-generated changelog ([`5c5f7fd`](https://github.com/egrieco/giti/commit/5c5f7fd7eb9d8288f5cbc02ffa07e0a13efc0f1f))
     - Add license and update metadata ([`4d70161`](https://github.com/egrieco/giti/commit/4d70161fd1ddeb0d017f5752e49a53af5932cece))
     - Move `calculate_directory_size` to util ([`0564449`](https://github.com/egrieco/giti/commit/0564449579ec6aaefffe113562bf54e125fd1a06))
     - Update incompatible dependencies ([`d9b7025`](https://github.com/egrieco/giti/commit/d9b7025863f60cf413c41af177beaf1f4f612110))
