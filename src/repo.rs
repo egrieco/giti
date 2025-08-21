@@ -109,11 +109,11 @@ impl Repo {
                 let datetime =
                     std::time::UNIX_EPOCH + std::time::Duration::from_secs(timestamp as u64);
                 let datetime: chrono::DateTime<chrono::Local> = datetime.into();
-                
+
                 // Calculate human-readable time difference
                 let now = chrono::Local::now();
                 let duration = now.signed_duration_since(datetime);
-                
+
                 let human_duration = if duration.num_days() > 0 {
                     format!("{} days ago", duration.num_days())
                 } else if duration.num_hours() > 0 {
@@ -123,8 +123,12 @@ impl Repo {
                 } else {
                     format!("{} seconds ago", duration.num_seconds())
                 };
-                
-                Ok(format!("{} ({})", datetime.format("%Y-%m-%d %H:%M:%S"), human_duration))
+                // color the output based on the duration: green for anything less than a week, blue for less than a month, yellow for less than a year, and red for any other interval AI!
+                Ok(format!(
+                    "{} ({})",
+                    datetime.format("%Y-%m-%d %H:%M:%S"),
+                    human_duration
+                ))
             }
             None => Ok("No commits found".to_string()),
         }
