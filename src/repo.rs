@@ -155,12 +155,12 @@ impl Repo {
 
     fn calculate_directory_size(&self, dir: &Path) -> Result<u64> {
         let mut total_size = 0;
-        
+
         if dir.is_dir() {
             for entry in fs::read_dir(dir)? {
                 let entry = entry?;
                 let path = entry.path();
-                
+
                 if path.is_dir() {
                     total_size += self.calculate_directory_size(&path)?;
                 } else {
@@ -168,7 +168,7 @@ impl Repo {
                 }
             }
         }
-        
+
         Ok(total_size)
     }
 
@@ -241,7 +241,7 @@ impl Repo {
         }
 
         if cli.repo_size {
-            println!("  Repo Size: {}", self.repo_size());
+            println!("{}", self.repo_size());
         }
 
         if cli.size {
