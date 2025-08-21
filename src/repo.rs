@@ -109,6 +109,7 @@ impl Repo {
                 let datetime =
                     std::time::UNIX_EPOCH + std::time::Duration::from_secs(timestamp as u64);
                 let datetime: chrono::DateTime<chrono::Local> = datetime.into();
+                // add a "human time" duration after the datetime that says how many seconds, minutes, hours, days, etc. since the datetime AI!
                 Ok(datetime.format("%Y-%m-%d %H:%M:%S").to_string())
             }
             None => Ok("No commits found".to_string()),
