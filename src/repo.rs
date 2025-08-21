@@ -87,13 +87,14 @@ impl Repo {
                 Ok(r) => r,
                 Err(_) => continue,
             };
-            
+
             let target = reference.target();
             if let Some(oid) = target.try_id() {
                 if let Ok(commit) = self.repo.find_object(oid)?.try_into_commit() {
                     let commit_time = commit.time()?;
-                    
-                    if most_recent_time.is_none() || commit_time.seconds > most_recent_time.unwrap() {
+
+                    if most_recent_time.is_none() || commit_time.seconds > most_recent_time.unwrap()
+                    {
                         most_recent_time = Some(commit_time.seconds);
                     }
                 }
@@ -103,8 +104,10 @@ impl Repo {
         match most_recent_time {
             Some(timestamp) => {
                 // Convert timestamp to human-readable format
-                let datetime = std::time::UNIX_EPOCH + std::time::Duration::from_secs(timestamp as u64);
+                let datetime =
+                    std::time::UNIX_EPOCH + std::time::Duration::from_secs(timestamp as u64);
                 let datetime: chrono::DateTime<chrono::Utc> = datetime.into();
+                // make this time display in the local timezone AI!
                 Ok(datetime.format("%Y-%m-%d %H:%M:%S UTC").to_string())
             }
             None => Ok("No commits found".to_string()),
