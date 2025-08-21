@@ -2,6 +2,8 @@ use color_eyre::Result;
 use gix::date::Time;
 use gix::{discover, remote::Direction, Remote, Repository};
 use std::{borrow::Cow, fs, path::Path};
+use yansi::Color::{self, *};
+use yansi::Paint;
 
 use crate::cli::Cli;
 use crate::util::format_display_time;
@@ -151,7 +153,7 @@ impl Repo {
 
     pub fn total_size(&self) -> Cow<'_, str> {
         if let Some(work_dir) = self.work_dir() {
-            match self.calculate_directory_size(&work_dir) {
+            match self.calculate_directory_size(work_dir) {
                 Ok(size) => format!("{INDENT}Total Size: {}", self.format_size(size)).into(),
                 Err(_) => "Unknown".into(),
             }
@@ -185,6 +187,7 @@ impl Repo {
 
     fn format_size(&self, size: u64) -> String {
         const UNITS: &[&str] = &["B", "KB", "MB", "GB", "TB"];
+        const COLOR: &[Color] = &[Blue, Green, Green, Yellow, Red];
         let mut size = size as f64;
         let mut unit_index = 0;
 
@@ -198,6 +201,8 @@ impl Repo {
         } else {
             format!("{:.1} {}", size, UNITS[unit_index])
         }
+        .paint(COLOR[unit_index])
+        .to_string()
     }
 
     pub fn print_tsv_info(&self, cli: &Cli) {
