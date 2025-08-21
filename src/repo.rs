@@ -123,7 +123,7 @@ impl Repo {
                 } else {
                     format!("{} seconds ago", duration.num_seconds())
                 };
-                
+
                 // Color the output based on the duration
                 let colored_duration = if duration.num_days() < 7 {
                     // Green for less than a week
@@ -138,7 +138,7 @@ impl Repo {
                     // Red for any other interval
                     format!("\x1b[31m{}\x1b[0m", human_duration)
                 };
-                
+
                 Ok(format!(
                     "{} ({})",
                     datetime.format("%Y-%m-%d %H:%M:%S"),
@@ -152,7 +152,7 @@ impl Repo {
     pub fn last_fetch(&self) -> Cow<'_, str> {
         if let Some(work_dir) = self.work_dir() {
             let git_dir = work_dir.join(".git");
-            
+
             // Check for FETCH_HEAD first
             let fetch_head_path = git_dir.join("FETCH_HEAD");
             if let Ok(metadata) = fs::metadata(&fetch_head_path) {
@@ -161,7 +161,7 @@ impl Repo {
                     return format!("fetched: {}", datetime.format("%Y-%m-%d %H:%M:%S")).into();
                 }
             }
-            
+
             // If FETCH_HEAD not found, check for HEAD
             let head_path = git_dir.join("HEAD");
             if let Ok(metadata) = fs::metadata(&head_path) {
@@ -171,7 +171,7 @@ impl Repo {
                 }
             }
         }
-        
+
         "Unknown".into()
     }
 
