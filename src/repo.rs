@@ -72,8 +72,42 @@ impl Repo {
     }
 
     pub fn last_update(&self) -> Cow<'_, str> {
-        // get the most recent commit from any available branch and return the timestamp of when it was committed AI!
-        todo!("Implement last update retrieval using gix")
+        match self.get_most_recent_commit_time() {
+            Ok(time) => time.into(),
+            Err(_) => "Unknown".into(),
+        }
+    }
+
+    fn get_most_recent_commit_time(&self) -> Result<String> {
+        let mut most_recent_time = None;
+
+        // Iterate through all references to find the most recent commit
+        for reference in self.repo.references()? {
+            let reference = reference?;
+            
+            // Skip non-branch references if possible, but include all for completeness
+            if let Some(target) = reference.target() {
+                if let Some(oid) = target.try_id() {
+                    if let Ok(commit) = self.repo.find_object(oid)?.try_into_commit() {
+                        let commit_time = commit.time();
+                        
+                        if most_recent_time.is_none() || commit_time.seconds > most_recent_time.unwrap() {
+                            most_recent_time = Some(commit_time.seconds);
+                        }
+                    }
+                }
+            }
+        }
+
+        match most_recent_time {
+            Some(timestamp) => {
+                // Convert timestamp to human-readable format
+                let datetime = std::time::UNIX_EPOCH + std::time::Duration::from_secs(timestamp as u64);
+                let datetime: chrono::DateTime<chrono::Utc> = datetime.into();
+                Ok(datetime.format("%Y-%m-%d %H:%M:%S UTC").to_string())
+            }
+            None => Ok("No commits found".to_string()),
+        }
     }
 
     pub fn last_fetch(&self) -> Cow<'_, str> {

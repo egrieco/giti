@@ -9,6 +9,7 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow = "1.0.99"
+chrono = "0.4"
 clap = { version = "4.0", features = ["derive"] }
 color-eyre = "0.6.5"
 gix = "0.66"
