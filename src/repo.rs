@@ -138,8 +138,55 @@ impl Repo {
     }
 
     pub fn repo_size(&self) -> Cow<'_, str> {
-        // calculate the total size on disk for the files in the `git_dir` AI!
-        todo!("Implement git repo size calculation using gix")
+        if let Some(work_dir) = self.work_dir() {
+            let git_dir = work_dir.join(".git");
+            match self.calculate_directory_size(&git_dir) {
+                Ok(size) => format!("{INDENT}Repo Size: {}", self.format_size(size)).into(),
+                Err(_) => "Unknown".into(),
+            }
+        } else {
+            // For bare repositories, use the repository's git directory
+            match self.calculate_directory_size(self.repo.git_dir()) {
+                Ok(size) => format!("{INDENT}Repo Size: {}", self.format_size(size)).into(),
+                Err(_) => "Unknown".into(),
+            }
+        }
+    }
+
+    fn calculate_directory_size(&self, dir: &Path) -> Result<u64> {
+        let mut total_size = 0;
+        
+        if dir.is_dir() {
+            for entry in fs::read_dir(dir)? {
+                let entry = entry?;
+                let path = entry.path();
+                
+                if path.is_dir() {
+                    total_size += self.calculate_directory_size(&path)?;
+                } else {
+                    total_size += entry.metadata()?.len();
+                }
+            }
+        }
+        
+        Ok(total_size)
+    }
+
+    fn format_size(&self, size: u64) -> String {
+        const UNITS: &[&str] = &["B", "KB", "MB", "GB", "TB"];
+        let mut size = size as f64;
+        let mut unit_index = 0;
+
+        while size >= 1024.0 && unit_index < UNITS.len() - 1 {
+            size /= 1024.0;
+            unit_index += 1;
+        }
+
+        if unit_index == 0 {
+            format!("{} {}", size as u64, UNITS[unit_index])
+        } else {
+            format!("{:.1} {}", size, UNITS[unit_index])
+        }
     }
 
     pub fn total_size(&self) -> Cow<'_, str> {
