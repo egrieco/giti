@@ -123,11 +123,26 @@ impl Repo {
                 } else {
                     format!("{} seconds ago", duration.num_seconds())
                 };
-                // color the output based on the duration: green for anything less than a week, blue for less than a month, yellow for less than a year, and red for any other interval AI!
+                
+                // Color the output based on the duration
+                let colored_duration = if duration.num_days() < 7 {
+                    // Green for less than a week
+                    format!("\x1b[32m{}\x1b[0m", human_duration)
+                } else if duration.num_days() < 30 {
+                    // Blue for less than a month
+                    format!("\x1b[34m{}\x1b[0m", human_duration)
+                } else if duration.num_days() < 365 {
+                    // Yellow for less than a year
+                    format!("\x1b[33m{}\x1b[0m", human_duration)
+                } else {
+                    // Red for any other interval
+                    format!("\x1b[31m{}\x1b[0m", human_duration)
+                };
+                
                 Ok(format!(
                     "{} ({})",
                     datetime.format("%Y-%m-%d %H:%M:%S"),
-                    human_duration
+                    colored_duration
                 ))
             }
             None => Ok("No commits found".to_string()),
