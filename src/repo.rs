@@ -72,6 +72,7 @@ impl Repo {
     }
 
     pub fn last_update(&self) -> Cow<'_, str> {
+        // get the most recent commit from any available branch and return the timestamp of when it was committed AI!
         todo!("Implement last update retrieval using gix")
     }
 
