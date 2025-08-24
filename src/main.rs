@@ -2,6 +2,7 @@ use clap::Parser;
 use color_eyre::Result;
 use giti::{cli::Cli, repo::Repo};
 use std::path::PathBuf;
+use yansi::Paint;
 
 fn main() {
     let mut cli = Cli::parse();
@@ -26,7 +27,7 @@ fn main() {
                     r.print_human_readable_info(&cli);
                 }
             }
-            Err(_) => todo!("Handle repo discovery errors"),
+            Err(e) => eprintln!("{}", format!("{e}").red()),
         }
     }
 }
