@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.1 (2025-08-24)
+
+### New Features
+
+ - <csr-id-ff42e434d257d086cf0f013185e8675d1432c1df/> Print repo errors
+
+### Bug Fixes
+
+ - <csr-id-de921c93b1efc7351f3c2dfd982de0230abfffde/> Fix program name in help
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 3 commits contributed to the release.
+ - 2 days passed between releases.
+ - 2 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Add extra clippy lints ([`bc33306`](https://github.com/egrieco/giti/commit/bc33306476f8e041034f8e9ade822cb335bd9031))
+    - Print repo errors ([`ff42e43`](https://github.com/egrieco/giti/commit/ff42e434d257d086cf0f013185e8675d1432c1df))
+    - Fix program name in help ([`de921c9`](https://github.com/egrieco/giti/commit/de921c93b1efc7351f3c2dfd982de0230abfffde))
+</details>
+
 ## v0.1.0 (2025-08-21)
 
 <csr-id-d9b7025863f60cf413c41af177beaf1f4f612110/>
@@ -70,7 +101,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 42 commits contributed to the release.
+ - 43 commits contributed to the release.
  - 34 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
 
@@ -81,6 +112,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release giti v0.1.0 ([`b24339b`](https://github.com/egrieco/giti/commit/b24339ba2610aecff016ceeef38a67832e2fb775))
     - Add auto-generated changelog ([`5c5f7fd`](https://github.com/egrieco/giti/commit/5c5f7fd7eb9d8288f5cbc02ffa07e0a13efc0f1f))
     - Add license and update metadata ([`4d70161`](https://github.com/egrieco/giti/commit/4d70161fd1ddeb0d017f5752e49a53af5932cece))
     - Move `calculate_directory_size` to util ([`0564449`](https://github.com/egrieco/giti/commit/0564449579ec6aaefffe113562bf54e125fd1a06))
