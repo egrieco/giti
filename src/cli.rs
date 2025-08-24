@@ -2,8 +2,12 @@ use clap::Parser;
 use std::path::PathBuf;
 
 #[derive(Parser)]
-#[command(name = "git-info")]
-#[command(about = "A CLI tool to get git repository information")]
+#[command(name = "giti")]
+#[command(
+    author,
+    version,
+    about = "A CLI tool to get git repository information"
+)]
 pub struct Cli {
     /// Print repo urls
     #[arg(short = 'r', long = "repo-urls")]
