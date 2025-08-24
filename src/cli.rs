@@ -8,6 +8,10 @@ use std::path::PathBuf;
     version,
     about = "A CLI tool to get git repository information"
 )]
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "Many bools make sense for CLI flags"
+)]
 pub struct Cli {
     /// Print repo urls
     #[arg(short = 'r', long = "repo-urls")]
