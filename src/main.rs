@@ -76,24 +76,78 @@ fn handle_clone(url: Option<String>) -> Result<()> {
         println!("Created directory: {}", repos_dir.display());
     }
 
-    println!("Cloning {} to {}", repo_url, repos_dir.display());
+    // Extract repository name from URL
+    let repo_name = extract_repo_name(&repo_url)?;
+    let dest_path = repos_dir.join(&repo_name);
 
-    // Run git clone
-    let status = Command::new("git")
-        .arg("clone")
-        .arg(&repo_url)
-        .current_dir(&repos_dir)
-        .status()?;
+    // Check if repository already exists
+    if dest_path.exists() && dest_path.join(".git").exists() {
+        println!(
+            "Repository already exists at {}, pulling latest changes...",
+            dest_path.display()
+        );
 
-    if status.success() {
-        println!("{}", "Clone successful!".green());
-        Ok(())
+        let status = Command::new("git")
+            .arg("pull")
+            .current_dir(&dest_path)
+            .status()?;
+
+        if status.success() {
+            println!("{}", "Pull successful!".green());
+            Ok(())
+        } else {
+            Err(color_eyre::eyre::eyre!(
+                "git pull exited with status: {}",
+                status
+            ))
+        }
     } else {
-        Err(color_eyre::eyre::eyre!(
-            "git clone exited with status: {}",
-            status
-        ))
+        println!("Cloning {} to {}", repo_url, repos_dir.display());
+
+        // Run git clone
+        let status = Command::new("git")
+            .arg("clone")
+            .arg(&repo_url)
+            .current_dir(&repos_dir)
+            .status()?;
+
+        if status.success() {
+            println!("{}", "Clone successful!".green());
+            Ok(())
+        } else {
+            Err(color_eyre::eyre::eyre!(
+                "git clone exited with status: {}",
+                status
+            ))
+        }
     }
+}
+
+fn extract_repo_name(url: &str) -> Result<String> {
+    // Handle various URL formats:
+    // https://github.com/user/repo.git
+    // https://github.com/user/repo
+    // git@github.com:user/repo.git
+    // git@github.com:user/repo
+    // ssh://git@github.com/user/repo.git
+
+    let url = url.trim_end_matches('/');
+    let url = url.strip_suffix(".git").unwrap_or(url);
+
+    // Get the last path component
+    let name = url
+        .rsplit('/')
+        .next()
+        .or_else(|| url.rsplit(':').next())
+        .ok_or_else(|| color_eyre::eyre::eyre!("Could not extract repository name from URL"))?;
+
+    if name.is_empty() {
+        return Err(color_eyre::eyre::eyre!(
+            "Could not extract repository name from URL"
+        ));
+    }
+
+    Ok(name.to_string())
 }
 
 fn get_repo_url(url: Option<String>) -> Result<String> {
