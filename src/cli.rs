@@ -1,4 +1,4 @@
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
 #[derive(Parser)]
@@ -8,11 +8,28 @@ use std::path::PathBuf;
     version,
     about = "A CLI tool to get git repository information"
 )]
+pub struct Cli {
+    #[command(subcommand)]
+    pub command: Option<Commands>,
+}
+
+#[derive(Subcommand)]
+pub enum Commands {
+    /// Clone a git repository to $HOME/Repos
+    Clone {
+        /// Repository URL to clone (can also be provided via stdin or clipboard)
+        url: Option<String>,
+    },
+    /// Show repository information (default behavior)
+    Info(InfoArgs),
+}
+
+#[derive(Parser, Default)]
 #[expect(
     clippy::struct_excessive_bools,
     reason = "Many bools make sense for CLI flags"
 )]
-pub struct Cli {
+pub struct InfoArgs {
     /// Print repo urls
     #[arg(short = 'r', long = "repo-urls")]
     pub repo_urls: bool,
@@ -41,7 +58,7 @@ pub struct Cli {
     pub paths: Vec<PathBuf>,
 }
 
-impl Cli {
+impl InfoArgs {
     pub fn setup_defaults(&mut self) {
         // If no flags specified, enable all info flags
         if !self.repo_urls && !self.last_update && !self.last_fetch && !self.repo_size && !self.size

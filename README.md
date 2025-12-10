@@ -8,3 +8,12 @@ A tool to easily query git repos for basic information like last update, last fe
 
 Query repository information:
 
+### Clone
+
+Clone a git repository to `$HOME/Repos`:
+
+The clone command checks for the repository URL in the following order:
+
+1. Standard input (stdin)
+2. Command line argument
+3. Clipboard (if it contains a valid git URL)

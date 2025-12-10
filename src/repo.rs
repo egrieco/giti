@@ -5,7 +5,7 @@ use std::{borrow::Cow, fs, path::Path};
 use yansi::Color::{self, *};
 use yansi::Paint;
 
-use crate::cli::Cli;
+use crate::cli::InfoArgs;
 use crate::util::calculate_directory_size;
 use crate::util::format_display_time;
 
@@ -187,7 +187,7 @@ impl Repo {
         .to_string()
     }
 
-    pub fn print_tsv_info(&self, cli: &Cli) {
+    pub fn print_tsv_info(&self, args: &InfoArgs) {
         let mut values = Vec::new();
 
         values.push(
@@ -196,49 +196,49 @@ impl Repo {
                 .unwrap_or_default(),
         );
 
-        if cli.repo_urls {
+        if args.repo_urls {
             values.push(self.repo_urls());
         }
 
-        if cli.last_update {
+        if args.last_update {
             values.push(self.last_update());
         }
 
-        if cli.last_fetch {
+        if args.last_fetch {
             values.push(self.last_fetch());
         }
 
-        if cli.repo_size {
+        if args.repo_size {
             values.push(self.repo_size());
         }
 
-        if cli.size {
+        if args.size {
             values.push(self.total_size());
         }
 
         println!("{}", values.join("\t"));
     }
 
-    pub fn print_human_readable_info(&self, cli: &Cli) {
+    pub fn print_human_readable_info(&self, args: &InfoArgs) {
         println!("Repository: {}", self.work_path());
 
-        if cli.repo_urls {
+        if args.repo_urls {
             println!("{}", self.repo_urls());
         }
 
-        if cli.last_update {
+        if args.last_update {
             println!("  Last Update: {}", self.last_update());
         }
 
-        if cli.last_fetch {
+        if args.last_fetch {
             println!("{}", self.last_fetch());
         }
 
-        if cli.repo_size {
+        if args.repo_size {
             println!("{}", self.repo_size());
         }
 
-        if cli.size {
+        if args.size {
             println!("{}", self.total_size());
         }
 
