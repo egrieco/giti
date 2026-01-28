@@ -42,7 +42,7 @@ impl Repo {
         }
     }
 
-    pub fn remotes(&self) -> Vec<Remote> {
+    pub fn remotes(&'_ self) -> Vec<Remote<'_>> {
         let mut remotes = Vec::new();
 
         for remote_name in self.repo.remote_names() {

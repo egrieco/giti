@@ -5,6 +5,8 @@ use giti::{
     cli::{Cli, Commands, InfoArgs},
     repo::Repo,
 };
+use gix::{url::parse, Url};
+use linkify::{LinkFinder, LinkKind};
 use std::io::{self, BufRead, IsTerminal};
 use std::path::PathBuf;
 use std::process::Command;
@@ -58,10 +60,19 @@ fn handle_info(args: &mut InfoArgs) {
 }
 
 fn handle_clone(url: Option<String>) -> Result<()> {
-    let repo_url = get_repo_url(url)?;
+    let input_text = get_input_text(url)?;
+    for url in extract_urls(&input_text) {
+        match url {
+            Ok(repo_url) => clone_repo(repo_url)?,
+            Err(e) => eprintln!("Error: {}", e),
+        }
+    }
+    Ok(())
+}
 
+fn clone_repo(repo_url: Url) -> Result<()> {
     // Validate URL
-    if !is_valid_git_url(&repo_url) {
+    if !is_valid_git_url(&repo_url.to_string()) {
         return Err(color_eyre::eyre::eyre!("Invalid git URL: {}", repo_url));
     }
 
@@ -77,7 +88,7 @@ fn handle_clone(url: Option<String>) -> Result<()> {
     }
 
     // Extract repository name from URL
-    let repo_name = extract_repo_name(&repo_url)?;
+    let repo_name = extract_repo_name(&repo_url.to_string())?;
     let dest_path = repos_dir.join(&repo_name);
 
     // Check if repository already exists
@@ -107,7 +118,7 @@ fn handle_clone(url: Option<String>) -> Result<()> {
         // Run git clone
         let status = Command::new("git")
             .arg("clone")
-            .arg(&repo_url)
+            .arg(&repo_url.to_string())
             .current_dir(&repos_dir)
             .status()?;
 
@@ -150,7 +161,7 @@ fn extract_repo_name(url: &str) -> Result<String> {
     Ok(name.to_string())
 }
 
-fn get_repo_url(url: Option<String>) -> Result<String> {
+fn get_input_text(url: Option<String>) -> Result<String> {
     // Priority 1: Check stdin (if not a terminal)
     if !io::stdin().is_terminal() {
         let stdin = io::stdin();
@@ -181,6 +192,18 @@ fn get_repo_url(url: Option<String>) -> Result<String> {
     Err(color_eyre::eyre::eyre!(
         "No repository URL provided. Provide via stdin, argument, or copy a valid URL to clipboard."
     ))
+}
+
+/// Extract URLs from a string
+///
+/// We'll return a Vec of Results so that we can potentially inform users of errors.
+fn extract_urls(text: &str) -> Vec<Result<gix::Url, parse::Error>> {
+    let mut finder = LinkFinder::new();
+    finder.kinds(&[LinkKind::Url]);
+    finder
+        .links(text)
+        .map(|l| gix::Url::try_from(l.as_str()))
+        .collect()
 }
 
 fn is_valid_git_url(url: &str) -> bool {
