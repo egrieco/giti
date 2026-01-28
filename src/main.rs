@@ -1,3 +1,4 @@
+use anyhow::bail;
 use arboard::Clipboard;
 use clap::Parser;
 use color_eyre::Result;
@@ -5,11 +6,11 @@ use giti::{
     cli::{Cli, Commands, InfoArgs},
     repo::Repo,
 };
-use gix::{url::parse, Url};
 use linkify::{LinkFinder, LinkKind};
 use std::io::{self, BufRead, IsTerminal};
 use std::path::PathBuf;
 use std::process::Command;
+use url::{ParseError, Url};
 use yansi::Paint;
 
 fn main() {
@@ -123,7 +124,7 @@ fn clone_repo(repo_url: Url) -> Result<()> {
         // Run git clone
         let status = Command::new("git")
             .arg("clone")
-            .arg(&repo_url.to_string())
+            .arg(clean_git_url(&repo_url)?)
             .current_dir(&repos_dir)
             .status()?;
 
@@ -200,13 +201,10 @@ fn get_input_text(url: Option<String>) -> Result<String> {
 /// Extract URLs from a string
 ///
 /// We'll return a Vec of Results so that we can potentially inform users of errors.
-fn extract_urls(text: &str) -> Vec<Result<gix::Url, parse::Error>> {
+fn extract_urls(text: &str) -> Vec<Result<Url, ParseError>> {
     let mut finder = LinkFinder::new();
     finder.kinds(&[LinkKind::Url]);
-    finder
-        .links(text)
-        .map(|l| gix::Url::try_from(l.as_str()))
-        .collect()
+    finder.links(text).map(|l| Url::parse(l.as_str())).collect()
 }
 
 fn is_valid_git_url(url: &str) -> bool {
@@ -217,4 +215,35 @@ fn is_valid_git_url(url: &str) -> bool {
         || url.starts_with("git@")
         || url.starts_with("ssh://")
         || url.ends_with(".git")
+}
+
+/// Clean extra path path segments, anchors and other cruft
+///
+/// We need to clean these off so that Git will be able to clone from this url.
+fn clean_git_url(url: &Url) -> Result<String> {
+    // Retrieve all segments as a Vec of strings.
+    let segments: Vec<_> = url
+        .path_segments()
+        .ok_or("Cannot be a base URL")
+        .map_err(|e| Err(e))?
+        .map(|s| s.to_owned())
+        .collect();
+
+    // Take only the first two segments.
+    let new_segments = segments.into_iter().take(2).collect::<Vec<_>>();
+
+    {
+        // Get a mutable view of the path segments.
+        let mut segs_mut = url
+            .path_segments_mut()
+            .map_err(|_| "Cannot be a base URL")?;
+        // Clear all existing segments.
+        segs_mut.clear();
+        // Push back the preserved segments.
+        for seg in new_segments {
+            segs_mut.push(&seg);
+        }
+    }
+
+    Ok(url.to_string())
 }
