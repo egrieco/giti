@@ -60,10 +60,15 @@ fn handle_info(args: &mut InfoArgs) {
 }
 
 fn handle_clone(url: Option<String>) -> Result<()> {
-    let input_text = get_input_text(url)?;
-    for url in extract_urls(&input_text) {
+    let input_text = dbg!(get_input_text(url)?);
+    let extracted_urls = extract_urls(&input_text);
+    eprintln!("Found {} urls in input.", extracted_urls.len());
+    for url in extracted_urls {
         match url {
-            Ok(repo_url) => clone_repo(repo_url)?,
+            Ok(repo_url) => {
+                println!("Cloning url: {}...", repo_url);
+                clone_repo(repo_url)?
+            }
             Err(e) => eprintln!("Error: {}", e),
         }
     }
@@ -168,6 +173,7 @@ fn get_input_text(url: Option<String>) -> Result<String> {
         if let Some(Ok(line)) = stdin.lock().lines().next() {
             let trimmed = line.trim().to_string();
             if !trimmed.is_empty() {
+                println!("Using STDIN source");
                 return Ok(trimmed);
             }
         }
@@ -175,23 +181,20 @@ fn get_input_text(url: Option<String>) -> Result<String> {
 
     // Priority 2: Use CLI argument if provided
     if let Some(u) = url {
+        println!("Using Arg source");
         return Ok(u);
     }
 
     // Priority 3: Try clipboard
-    if let Ok(mut clipboard) = Clipboard::new() {
-        if let Ok(text) = clipboard.get_text() {
-            let trimmed = text.trim().to_string();
-            if is_valid_git_url(&trimmed) {
-                println!("Using URL from clipboard: {}", trimmed);
-                return Ok(trimmed);
-            }
-        }
-    }
+    let mut clipboard = Clipboard::new()?;
+    let text = clipboard.get_text()?;
+    let trimmed = text.trim().to_string();
+    println!("Using Clipboard source");
+    Ok(trimmed)
 
-    Err(color_eyre::eyre::eyre!(
-        "No repository URL provided. Provide via stdin, argument, or copy a valid URL to clipboard."
-    ))
+    // Err(color_eyre::eyre::eyre!(
+    //     "No repository URL provided. Provide via stdin, argument, or copy a valid URL to clipboard."
+    // ))
 }
 
 /// Extract URLs from a string
