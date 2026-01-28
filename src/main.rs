@@ -221,27 +221,28 @@ fn is_valid_git_url(url: &str) -> bool {
 ///
 /// We need to clean these off so that Git will be able to clone from this url.
 fn clean_git_url(url: &Url) -> Result<String> {
+    let mut url = url.clone();
+
     // Retrieve all segments as a Vec of strings.
     let segments: Vec<_> = url
         .path_segments()
-        .ok_or("Cannot be a base URL")
-        .map_err(|e| Err(e))?
+        .ok_or_else(|| color_eyre::eyre::eyre!("Cannot be a base URL"))?
         .map(|s| s.to_owned())
         .collect();
 
     // Take only the first two segments.
-    let new_segments = segments.into_iter().take(2).collect::<Vec<_>>();
+    let new_segments: Vec<_> = segments.into_iter().take(2).collect();
 
     {
         // Get a mutable view of the path segments.
         let mut segs_mut = url
             .path_segments_mut()
-            .map_err(|_| "Cannot be a base URL")?;
+            .map_err(|_| color_eyre::eyre::eyre!("Cannot be a base URL"))?;
         // Clear all existing segments.
         segs_mut.clear();
         // Push back the preserved segments.
-        for seg in new_segments {
-            segs_mut.push(&seg);
+        for seg in &new_segments {
+            segs_mut.push(seg);
         }
     }
 
