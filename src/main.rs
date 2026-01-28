@@ -76,9 +76,14 @@ fn handle_clone(url: Option<String>) -> Result<()> {
 }
 
 fn clone_repo(repo_url: Url) -> Result<()> {
+    let clean_repo_url = clean_git_url(&repo_url)?;
+
     // Validate URL
-    if !is_valid_git_url(&repo_url.to_string()) {
-        return Err(color_eyre::eyre::eyre!("Invalid git URL: {}", repo_url));
+    if !is_valid_git_url(&clean_repo_url.to_string()) {
+        return Err(color_eyre::eyre::eyre!(
+            "Invalid git URL: {}",
+            clean_repo_url
+        ));
     }
 
     // Get $HOME/Repos directory
@@ -93,7 +98,7 @@ fn clone_repo(repo_url: Url) -> Result<()> {
     }
 
     // Extract repository name from URL
-    let repo_name = extract_repo_name(&repo_url.to_string())?;
+    let repo_name = extract_repo_name(&clean_repo_url.to_string())?;
     let dest_path = repos_dir.join(&repo_name);
 
     // Check if repository already exists
@@ -118,12 +123,12 @@ fn clone_repo(repo_url: Url) -> Result<()> {
             ))
         }
     } else {
-        println!("Cloning {} to {}", repo_url, repos_dir.display());
+        println!("Cloning {} to {}", clean_repo_url, repos_dir.display());
 
         // Run git clone
         let status = Command::new("git")
             .arg("clone")
-            .arg(clean_git_url(&repo_url)?)
+            .arg(&clean_repo_url.to_string())
             .current_dir(&repos_dir)
             .status()?;
 
@@ -219,7 +224,7 @@ fn is_valid_git_url(url: &str) -> bool {
 /// Clean extra path path segments, anchors and other cruft
 ///
 /// We need to clean these off so that Git will be able to clone from this url.
-fn clean_git_url(url: &Url) -> Result<String> {
+fn clean_git_url(url: &Url) -> Result<Url> {
     let mut url = url.clone();
 
     // Retrieve all segments as a Vec of strings.
@@ -246,5 +251,5 @@ fn clean_git_url(url: &Url) -> Result<String> {
     // Remove the query string
     url.set_query(None);
 
-    Ok(url.to_string())
+    Ok(url)
 }
