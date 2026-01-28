@@ -1,4 +1,3 @@
-use anyhow::bail;
 use arboard::Clipboard;
 use clap::Parser;
 use color_eyre::Result;
@@ -224,27 +223,28 @@ fn clean_git_url(url: &Url) -> Result<String> {
     let mut url = url.clone();
 
     // Retrieve all segments as a Vec of strings.
-    let segments: Vec<_> = url
+    let segments = url
         .path_segments()
         .ok_or_else(|| color_eyre::eyre::eyre!("Cannot be a base URL"))?
-        .map(|s| s.to_owned())
-        .collect();
+        .map(|s| s.to_owned());
 
-    // Take only the first two segments.
-    let new_segments: Vec<_> = segments.into_iter().take(2).collect();
+    // Count the segments.
+    let segments_count: usize = segments.count();
 
-    {
+    if segments_count > 2 {
         // Get a mutable view of the path segments.
         let mut segs_mut = url
             .path_segments_mut()
             .map_err(|_| color_eyre::eyre::eyre!("Cannot be a base URL"))?;
-        // Clear all existing segments.
-        segs_mut.clear();
-        // Push back the preserved segments.
-        for seg in &new_segments {
-            segs_mut.push(seg);
+
+        // Pop all segments except two
+        for _ in 0..(segments_count - 2) {
+            segs_mut.pop();
         }
     }
+
+    // Remove the query string
+    url.set_query(None);
 
     Ok(url.to_string())
 }
