@@ -5,6 +5,56 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.2 (2026-01-28)
+
+### New Features
+
+ - <csr-id-0a059ba33ede376d676e3d358c6c89ef4e119f02/> Add Wayland support for clipboard
+ - <csr-id-c491f6d1f7a5c07d4cc86b9ebd3577d14c3a738c/> Parse multiple links from input
+ - <csr-id-8650965205730b29a67a15b3d72cf23264c359cd/> add git pull support when repository already exists
+ - <csr-id-04eff761cdd197bc78f4be41a35c97db4e9491ac/> add clone subcommand with URL input from stdin, argument, or clipboard
+
+### Bug Fixes
+
+ - <csr-id-79ee4e8a4f9e160226277f7c2da23e51b9c96e40/> Clean repo Url earlier
+ - <csr-id-253c7544f5bfe55b7b4bb703617a6134da9a0652/> Make clean_git_url work
+
+### Refactor
+
+ - <csr-id-a8101b74e7d1c0982b03067e9dbcec1a41dd3d1c/> fix error handling in clean_git_url function
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 14 commits contributed to the release over the course of 156 calendar days.
+ - 157 days passed between releases.
+ - 7 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Clean repo Url earlier ([`79ee4e8`](https://github.com/egrieco/giti/commit/79ee4e8a4f9e160226277f7c2da23e51b9c96e40))
+    - Make clean_git_url work ([`253c754`](https://github.com/egrieco/giti/commit/253c7544f5bfe55b7b4bb703617a6134da9a0652))
+    - Fix error handling in clean_git_url function ([`a8101b7`](https://github.com/egrieco/giti/commit/a8101b74e7d1c0982b03067e9dbcec1a41dd3d1c))
+    - Add clean_git_url method ([`f4308c2`](https://github.com/egrieco/giti/commit/f4308c2ae600e145acb67fcdc518bac1d1977835))
+    - Add Wayland support for clipboard ([`0a059ba`](https://github.com/egrieco/giti/commit/0a059ba33ede376d676e3d358c6c89ef4e119f02))
+    - Update incompatible dependencies ([`8a69876`](https://github.com/egrieco/giti/commit/8a69876dcb02800ccdb85f340fe44bdc05190424))
+    - Update compatible dependencies ([`f77b783`](https://github.com/egrieco/giti/commit/f77b783c461baad58de80a947da83ca77f3a8ea5))
+    - Add some debug print statements ([`3c63bdc`](https://github.com/egrieco/giti/commit/3c63bdc53a2653b657e655b5881720b79b8e89b1))
+    - Parse multiple links from input ([`c491f6d`](https://github.com/egrieco/giti/commit/c491f6d1f7a5c07d4cc86b9ebd3577d14c3a738c))
+    - Add git pull support when repository already exists ([`8650965`](https://github.com/egrieco/giti/commit/8650965205730b29a67a15b3d72cf23264c359cd))
+    - Add clone subcommand with URL input from stdin, argument, or clipboard ([`04eff76`](https://github.com/egrieco/giti/commit/04eff761cdd197bc78f4be41a35c97db4e9491ac))
+    - Based on the changes we've made, here's a concise commit message that captures the essence of the new feature: ([`8343bca`](https://github.com/egrieco/giti/commit/8343bcad8b994024c322f6a39529e79d8e4dcefb))
+    - Add todos ([`80d8bca`](https://github.com/egrieco/giti/commit/80d8bca86925039652734d103f60dd4156e8ea45))
+    - Add TODO design doc ([`2e236fb`](https://github.com/egrieco/giti/commit/2e236fbec41705efa9d088f4e123be9a98086aed))
+</details>
+
 ## v0.1.1 (2025-08-24)
 
 ### New Features
@@ -19,7 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 3 commits contributed to the release.
+ - 4 commits contributed to the release.
  - 2 days passed between releases.
  - 2 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
@@ -31,6 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release giti v0.1.1 ([`b755830`](https://github.com/egrieco/giti/commit/b7558300d2b2665591280b0b154a4c8ca2057fbf))
     - Add extra clippy lints ([`bc33306`](https://github.com/egrieco/giti/commit/bc33306476f8e041034f8e9ade822cb335bd9031))
     - Print repo errors ([`ff42e43`](https://github.com/egrieco/giti/commit/ff42e434d257d086cf0f013185e8675d1432c1df))
     - Fix program name in help ([`de921c9`](https://github.com/egrieco/giti/commit/de921c93b1efc7351f3c2dfd982de0230abfffde))
