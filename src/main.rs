@@ -60,13 +60,13 @@ fn handle_info(args: &mut InfoArgs) {
 }
 
 fn handle_clone(url: Option<String>) -> Result<()> {
-    let input_text = dbg!(get_input_text(url)?);
+    let input_text = get_input_text(url)?;
     let extracted_urls = extract_urls(&input_text);
     eprintln!("Found {} urls in input.", extracted_urls.len());
     for url in extracted_urls {
         match url {
             Ok(repo_url) => {
-                println!("Cloning url: {}...", repo_url);
+                eprintln!("Cloning url: {}...", repo_url);
                 clone_repo(repo_url)?
             }
             Err(e) => eprintln!("Error: {}", e),
