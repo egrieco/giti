@@ -2,7 +2,7 @@ use arboard::Clipboard;
 use clap::Parser;
 use color_eyre::Result;
 use giti::{
-    cli::{Cli, Commands, InfoArgs},
+    cli::{Cli, Commands, InfoArgs, OpenArgs},
     repo::Repo,
 };
 use linkify::{LinkFinder, LinkKind};
@@ -24,6 +24,12 @@ fn main() {
         }
         Some(Commands::Info(mut args)) => {
             handle_info(&mut args);
+        }
+        Some(Commands::Open(args)) => {
+            if let Err(e) = handle_open(&args) {
+                eprintln!("{}", format!("Open failed: {e}").red());
+                std::process::exit(1);
+            }
         }
         None => {
             // Default behavior: treat as info command with no args
@@ -57,6 +63,33 @@ fn handle_info(args: &mut InfoArgs) {
             Err(e) => eprintln!("{}", format!("{e}").red()),
         }
     }
+}
+
+fn handle_open(args: &OpenArgs) -> Result<()> {
+    let path = args.path.clone().unwrap_or_else(|| PathBuf::from("."));
+    let repo = Repo::new(&path)?;
+
+    let url = repo.get_web_url(&args.remote, &args.page, args.forge.as_deref())?;
+
+    println!("Opening: {}", url);
+
+    // Open the URL in the default browser
+    #[cfg(target_os = "macos")]
+    {
+        Command::new("open").arg(&url).status()?;
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        Command::new("xdg-open").arg(&url).status()?;
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        Command::new("cmd").args(["/C", "start", &url]).status()?;
+    }
+
+    Ok(())
 }
 
 fn handle_clone(url: Option<String>) -> Result<()> {

@@ -1,4 +1,4 @@
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 use std::path::PathBuf;
 
 #[derive(Parser)]
@@ -22,6 +22,8 @@ pub enum Commands {
     },
     /// Show repository information (default behavior)
     Info(InfoArgs),
+    /// Open repository URLs in the browser
+    Open(OpenArgs),
 }
 
 #[derive(Parser, Default)]
@@ -70,4 +72,49 @@ impl InfoArgs {
             self.size = true;
         }
     }
+}
+
+#[derive(Parser)]
+pub struct OpenArgs {
+    /// The page to open
+    #[arg(value_enum, default_value = "repo")]
+    pub page: OpenPage,
+
+    /// Override the forge/service to use (e.g., github, gitlab, bitbucket)
+    #[arg(long = "forge", visible_alias = "service", visible_alias = "site")]
+    pub forge: Option<String>,
+
+    /// Remote name to use (defaults to "origin")
+    #[arg(short = 'r', long = "remote", default_value = "origin")]
+    pub remote: String,
+
+    /// Repository path (defaults to current directory)
+    pub path: Option<PathBuf>,
+}
+
+#[derive(ValueEnum, Clone, Default, Debug)]
+pub enum OpenPage {
+    /// The main repository page
+    #[default]
+    Repo,
+    /// The code/source page (same as repo on most forges)
+    Code,
+    /// The author/organization page
+    #[value(alias = "org")]
+    Author,
+    /// The issues/bug tracker page
+    Issues,
+    /// The pull requests page
+    #[value(alias = "pull-requests", alias = "prs", alias = "mrs")]
+    Pulls,
+    /// The wiki page
+    Wiki,
+    /// The commits listing
+    Commits,
+    /// The branches listing
+    Branches,
+    /// The tags listing
+    Tags,
+    /// The releases page
+    Releases,
 }

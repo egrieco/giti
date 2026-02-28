@@ -5,11 +5,207 @@ use std::{borrow::Cow, fs, path::Path};
 use yansi::Color::{self, *};
 use yansi::Paint;
 
-use crate::cli::InfoArgs;
+use crate::cli::{InfoArgs, OpenPage};
 use crate::util::calculate_directory_size;
 use crate::util::format_display_time;
 
 const INDENT: &str = "  ";
+
+/// Represents a parsed git remote URL with owner and repo name
+#[derive(Debug, Clone)]
+pub struct ParsedRemoteUrl {
+    pub host: String,
+    pub owner: String,
+    pub repo: String,
+}
+
+impl ParsedRemoteUrl {
+    /// Parse a git remote URL into its components
+    ///
+    /// Supports various formats:
+    /// - https://github.com/owner/repo.git
+    /// - https://github.com/owner/repo
+    /// - git@github.com:owner/repo.git
+    /// - git@github.com:owner/repo
+    /// - ssh://git@github.com/owner/repo.git
+    pub fn parse(url: &str) -> Result<Self> {
+        let url = url.trim();
+
+        // Handle SSH URLs like git@github.com:owner/repo.git
+        if url.starts_with("git@") {
+            return Self::parse_ssh_url(url);
+        }
+
+        // Handle ssh:// URLs like ssh://git@github.com/owner/repo.git
+        if url.starts_with("ssh://") {
+            return Self::parse_ssh_protocol_url(url);
+        }
+
+        // Handle HTTPS/HTTP URLs
+        if url.starts_with("https://") || url.starts_with("http://") || url.starts_with("git://") {
+            return Self::parse_https_url(url);
+        }
+
+        Err(color_eyre::eyre::eyre!("Unsupported URL format: {}", url))
+    }
+
+    fn parse_ssh_url(url: &str) -> Result<Self> {
+        // git@github.com:owner/repo.git
+        let without_prefix = url.strip_prefix("git@").ok_or_else(|| {
+            color_eyre::eyre::eyre!("Invalid SSH URL format")
+        })?;
+
+        let (host, path) = without_prefix.split_once(':').ok_or_else(|| {
+            color_eyre::eyre::eyre!("Invalid SSH URL format: missing ':'")
+        })?;
+
+        Self::parse_owner_repo(host, path)
+    }
+
+    fn parse_ssh_protocol_url(url: &str) -> Result<Self> {
+        // ssh://git@github.com/owner/repo.git
+        let without_prefix = url.strip_prefix("ssh://git@").ok_or_else(|| {
+            color_eyre::eyre::eyre!("Invalid SSH protocol URL format")
+        })?;
+
+        let (host, path) = without_prefix.split_once('/').ok_or_else(|| {
+            color_eyre::eyre::eyre!("Invalid SSH protocol URL format: missing '/'")
+        })?;
+
+        Self::parse_owner_repo(host, path)
+    }
+
+    fn parse_https_url(url: &str) -> Result<Self> {
+        // https://github.com/owner/repo.git
+        let parsed = url::Url::parse(url)?;
+
+        let host = parsed.host_str().ok_or_else(|| {
+            color_eyre::eyre::eyre!("URL has no host")
+        })?.to_string();
+
+        let path = parsed.path().trim_start_matches('/');
+
+        Self::parse_owner_repo(&host, path)
+    }
+
+    fn parse_owner_repo(host: &str, path: &str) -> Result<Self> {
+        let path = path.trim_end_matches('/');
+        let path = path.strip_suffix(".git").unwrap_or(path);
+
+        let parts: Vec<&str> = path.split('/').collect();
+
+        if parts.len() < 2 {
+            return Err(color_eyre::eyre::eyre!(
+                "Could not extract owner/repo from path: {}",
+                path
+            ));
+        }
+
+        Ok(Self {
+            host: host.to_string(),
+            owner: parts[0].to_string(),
+            repo: parts[1].to_string(),
+        })
+    }
+
+    /// Get the base web URL for this repository
+    pub fn base_url(&self) -> String {
+        format!("https://{}/{}/{}", self.host, self.owner, self.repo)
+    }
+
+    /// Get the URL for a specific page on the forge
+    pub fn page_url(&self, page: &OpenPage, forge_override: Option<&str>) -> String {
+        let host = forge_override.map_or_else(
+            || self.host.as_str(),
+            |f| match f.to_lowercase().as_str() {
+                "github" | "gh" => "github.com",
+                "gitlab" | "gl" => "gitlab.com",
+                "bitbucket" | "bb" => "bitbucket.org",
+                "codeberg" | "cb" => "codeberg.org",
+                "sourcehut" | "sr" | "srht" => "sr.ht",
+                other => other,
+            },
+        );
+
+        let base = format!("https://{}/{}/{}", host, self.owner, self.repo);
+
+        // Determine the forge type for URL construction
+        let forge_type = self.detect_forge_type(host);
+
+        match page {
+            OpenPage::Repo | OpenPage::Code => base,
+            OpenPage::Author => format!("https://{}/{}", host, self.owner),
+            OpenPage::Issues => match forge_type {
+                ForgeType::Bitbucket => format!("{}/issues", base),
+                ForgeType::SourceHut => format!("https://todo.sr.ht/~{}/{}", self.owner, self.repo),
+                _ => format!("{}/issues", base),
+            },
+            OpenPage::Pulls => match forge_type {
+                ForgeType::GitLab => format!("{}/-/merge_requests", base),
+                ForgeType::Bitbucket => format!("{}/pull-requests", base),
+                ForgeType::SourceHut => format!("https://lists.sr.ht/~{}/{}", self.owner, self.repo),
+                _ => format!("{}/pulls", base),
+            },
+            OpenPage::Wiki => match forge_type {
+                ForgeType::GitLab => format!("{}/-/wikis/home", base),
+                ForgeType::Bitbucket => format!("{}/wiki", base),
+                ForgeType::SourceHut => base, // SourceHut doesn't have wikis
+                _ => format!("{}/wiki", base),
+            },
+            OpenPage::Commits => match forge_type {
+                ForgeType::GitLab => format!("{}/-/commits/main", base),
+                ForgeType::Bitbucket => format!("{}/commits", base),
+                ForgeType::SourceHut => format!("{}/log", base),
+                _ => format!("{}/commits/main", base),
+            },
+            OpenPage::Branches => match forge_type {
+                ForgeType::GitLab => format!("{}/-/branches", base),
+                ForgeType::Bitbucket => format!("{}/branches", base),
+                ForgeType::SourceHut => format!("{}/refs", base),
+                _ => format!("{}/branches", base),
+            },
+            OpenPage::Tags => match forge_type {
+                ForgeType::GitLab => format!("{}/-/tags", base),
+                ForgeType::Bitbucket => format!("{}/downloads/?tab=tags", base),
+                ForgeType::SourceHut => format!("{}/refs", base),
+                _ => format!("{}/tags", base),
+            },
+            OpenPage::Releases => match forge_type {
+                ForgeType::GitLab => format!("{}/-/releases", base),
+                ForgeType::Bitbucket => format!("{}/downloads", base),
+                ForgeType::SourceHut => format!("{}/refs", base),
+                _ => format!("{}/releases", base),
+            },
+        }
+    }
+
+    fn detect_forge_type(&self, host: &str) -> ForgeType {
+        let host_lower = host.to_lowercase();
+        if host_lower.contains("github") {
+            ForgeType::GitHub
+        } else if host_lower.contains("gitlab") {
+            ForgeType::GitLab
+        } else if host_lower.contains("bitbucket") {
+            ForgeType::Bitbucket
+        } else if host_lower.contains("codeberg") {
+            ForgeType::Codeberg
+        } else if host_lower.contains("sr.ht") || host_lower.contains("sourcehut") {
+            ForgeType::SourceHut
+        } else {
+            // Default to GitHub-style URLs for unknown forges
+            ForgeType::GitHub
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum ForgeType {
+    GitHub,
+    GitLab,
+    Bitbucket,
+    Codeberg,
+    SourceHut,
+}
 
 pub struct Repo {
     repo: Repository,
@@ -52,6 +248,31 @@ impl Repo {
         }
 
         remotes
+    }
+
+    /// Get the URL for a specific remote
+    pub fn get_remote_url(&self, remote_name: &str) -> Result<String> {
+        let remote = self.repo.find_remote(remote_name).map_err(|_| {
+            color_eyre::eyre::eyre!("Remote '{}' not found", remote_name)
+        })?;
+
+        let url = remote.url(Direction::Fetch).ok_or_else(|| {
+            color_eyre::eyre::eyre!("Remote '{}' has no fetch URL", remote_name)
+        })?;
+
+        Ok(url.to_string())
+    }
+
+    /// Get the web URL for a specific page
+    pub fn get_web_url(
+        &self,
+        remote_name: &str,
+        page: &OpenPage,
+        forge_override: Option<&str>,
+    ) -> Result<String> {
+        let remote_url = self.get_remote_url(remote_name)?;
+        let parsed = ParsedRemoteUrl::parse(&remote_url)?;
+        Ok(parsed.page_url(page, forge_override))
     }
 
     pub fn repo_urls(&self) -> Cow<'_, str> {
@@ -219,7 +440,7 @@ impl Repo {
         println!("{}", values.join("\t"));
     }
 
-    pub fn print_human_readable_info(&self, args: &InfoArgs) {
+    pub fn print_human_readable_info(&self,args: &InfoArgs) {
         println!("Repository: {}", self.work_path());
 
         if args.repo_urls {
