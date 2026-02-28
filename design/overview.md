@@ -21,3 +21,29 @@ The program should take an arbitrary number of args on the command line and retu
 
   -h,--help         Help (this text)
 ```
+
+## Commands
+
+Giti supports a number of subcommands. The default, when no arguments are provided, is `info`.
+
+### Info
+
+Print relevant info about the current repository or those specified via cli args.
+
+Here is an example of the currnt output:
+
+```text
+Repository: /home/USER/Projects/giti
+  Repo URLs:
+    origin git@github.com:USER/giti.git
+  Last Update: 2026-02-26 14:59:00 (a day ago)
+  Last fetched: 2025-08-21 15:39:57 (6 months ago)
+  Repo Size: 652.2 KB
+  Total Size: 13.1 GB
+```
+
+### Clone
+
+- Looks for URLs in the input text
+- Cleans up URLs, converting them to standard repository URLs
+- Clones the repositories to `~/Repos` or, if it finds an existing repo there, performs a pull on that repo
