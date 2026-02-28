@@ -47,3 +47,22 @@ Repository: /home/USER/Projects/giti
 - Looks for URLs in the input text
 - Cleans up URLs, converting them to standard repository URLs
 - Clones the repositories to `~/Repos` or, if it finds an existing repo there, performs a pull on that repo
+
+### Open
+
+Opens URLs related to the repository in the browser. The following subcommands are available:
+
+- `repo` (default): The main repo URL
+- `code`: The same as above on GitHub
+- `author`/`org`: The page for the entitiy that owns the repo
+- `issues`: The issue/bug tracker
+- `pulls`/`pull-requests`: Pull requests
+- `wiki`: The wiki main page
+- `commits`: The listing of commits for the `main` branch
+- `branches`: Listing of branches
+- `tags`: Listing of tags
+- `releases`: Releases page
+
+There are other pages that we may add later, but we want to keep this relatively simple for now.
+
+This should also take a `--forge`/`--service`/`--site` arg in case the repo is available across multiple services.
