@@ -5,7 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.1.3 (2026-02-27)
+
+### Chore
+
+ - <csr-id-0bd2c2f2c958d959dd0bc54c021f869109c63cf4/> Remove dbg statement and print to stderr
+
+### New Features
+
+ - <csr-id-5297537433561ec05c2cd36e27b818888d1081ab/> add open command to open repository pages in browser
+
+### Bug Fixes
+
+ - <csr-id-c6d4d23bac65ebd4c382bb26d53b3dde42d307a1/> return owned String instead of reference to temporary in forge override match
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 6 commits contributed to the release over the course of 1 calendar day.
+ - 30 days passed between releases.
+ - 3 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Return owned String instead of reference to temporary in forge override match ([`c6d4d23`](https://github.com/egrieco/giti/commit/c6d4d23bac65ebd4c382bb26d53b3dde42d307a1))
+    - Add open command to open repository pages in browser ([`5297537`](https://github.com/egrieco/giti/commit/5297537433561ec05c2cd36e27b818888d1081ab))
+    - Add open command docs ([`619002b`](https://github.com/egrieco/giti/commit/619002b4502cb650c6a2df3689ed9a8024d20e47))
+    - Add commands section ([`6adf1c6`](https://github.com/egrieco/giti/commit/6adf1c6350617d91ca46ac632fde30ba6a02d39a))
+    - Add Finding and Validating Git URLs ([`db56382`](https://github.com/egrieco/giti/commit/db56382ab7a1a6a526cdea7093de15c5adf8384f))
+    - Remove dbg statement and print to stderr ([`0bd2c2f`](https://github.com/egrieco/giti/commit/0bd2c2f2c958d959dd0bc54c021f869109c63cf4))
+</details>
+
 ## v0.1.2 (2026-01-28)
+
+<csr-id-a8101b74e7d1c0982b03067e9dbcec1a41dd3d1c/>
 
 ### New Features
 
@@ -27,7 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 14 commits contributed to the release over the course of 156 calendar days.
+ - 15 commits contributed to the release over the course of 156 calendar days.
  - 157 days passed between releases.
  - 7 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
@@ -39,6 +79,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release giti v0.1.2 ([`cbeb669`](https://github.com/egrieco/giti/commit/cbeb6696435650dc1e431f235eb0691c8465ca77))
     - Clean repo Url earlier ([`79ee4e8`](https://github.com/egrieco/giti/commit/79ee4e8a4f9e160226277f7c2da23e51b9c96e40))
     - Make clean_git_url work ([`253c754`](https://github.com/egrieco/giti/commit/253c7544f5bfe55b7b4bb703617a6134da9a0652))
     - Fix error handling in clean_git_url function ([`a8101b7`](https://github.com/egrieco/giti/commit/a8101b74e7d1c0982b03067e9dbcec1a41dd3d1c))
