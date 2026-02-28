@@ -115,22 +115,22 @@ impl ParsedRemoteUrl {
 
     /// Get the URL for a specific page on the forge
     pub fn page_url(&self, page: &OpenPage, forge_override: Option<&str>) -> String {
-        let host = forge_override.map_or_else(
-            || self.host.as_str(),
-            |f| match f.to_lowercase().as_str() {
-                "github" | "gh" => "github.com",
-                "gitlab" | "gl" => "gitlab.com",
-                "bitbucket" | "bb" => "bitbucket.org",
-                "codeberg" | "cb" => "codeberg.org",
-                "sourcehut" | "sr" | "srht" => "sr.ht",
-                other => other,
+        let host = match forge_override {
+            Some(f) => match f.to_lowercase().as_str() {
+                "github" | "gh" => "github.com".to_string(),
+                "gitlab" | "gl" => "gitlab.com".to_string(),
+                "bitbucket" | "bb" => "bitbucket.org".to_string(),
+                "codeberg" | "cb" => "codeberg.org".to_string(),
+                "sourcehut" | "sr" | "srht" => "sr.ht".to_string(),
+                _ => f.to_string(),
             },
-        );
+            None => self.host.clone(),
+        };
 
         let base = format!("https://{}/{}/{}", host, self.owner, self.repo);
 
         // Determine the forge type for URL construction
-        let forge_type = self.detect_forge_type(host);
+        let forge_type = self.detect_forge_type(&host);
 
         match page {
             OpenPage::Repo | OpenPage::Code => base,
